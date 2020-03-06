@@ -87,6 +87,7 @@ final MessageQueue mQueue;
     }
 
      public Looper getLooper() {
+       	// 判断线程是否启动，未启动直接返回null
         if (!isAlive()) {
             return null;
         }
@@ -116,7 +117,7 @@ HandlerThread ht = new HandlerThread();
 ht.start();
 
 ······
-
+// getLooper()要在start()后调用，否则会返回null
 Handler h = new Handler(ht.getLooper())；
 h.sendEmptyMsg()
 ```
