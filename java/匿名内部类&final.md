@@ -2,8 +2,22 @@
 
 　　想必这个问题也曾经困扰过很多人，在讨论这个问题之前，先看下面这段代码：
 
-```
-`public` `class` `Test {``    ``public` `static` `void` `main(String[] args)  {``        ` `    ``}``    ` `    ``public` `void` `test(``final` `int` `b) {``        ``final` `int` `a = ``10``;``        ``new` `Thread(){``            ``public` `void` `run() {``                ``System.out.println(a);``                ``System.out.println(b);``            ``};``        ``}.start();``    ``}``}`
+```java
+ public class Test {
+        public static void main(String[] args) {
+        }
+
+        public void test(final int b) {
+            final int a = 10;
+            new Thread() {
+                public void run() {
+                    System.out.println(a);
+                    System.out.println(b);
+                }
+                ;
+            }.start();
+        }
+    }
 ```
 
 　　这段代码会被编译成两个class文件：Test.class和Test1.𝑐𝑙𝑎𝑠𝑠。默认情况下，编译器会为匿名内部类和局部内部类起名为𝑂𝑢𝑡𝑡𝑒𝑟1.class。默认情况下，编译器会为匿名内部类和局部内部类起名为Outterx.class（x为正整数）。
