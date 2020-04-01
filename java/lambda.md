@@ -203,4 +203,18 @@ class Test {
 
 ### Dart Lambda
 
-未完待续。。。
+
+
+```dart
+声明：
+返回值 Function(参数类型， 参数类型) 变量名
+  int Function(int, int) fun;
+实现：
+(参数名，参数名) {
+  // 实现体
+}
+(a, b) {
+	return a + b;
+}
+```
+
