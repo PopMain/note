@@ -12,7 +12,14 @@ class ViewGroup(context: Context?) : View(context) {
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         // 先判断是否消费
         var handler = false
-        val intercept = onTouchEvent(event)
+       // 是否拦截事件
+        val intercept
+        if (disAllowIntercept) {
+          // requestDisallowInterceptTouchEvent(true)
+          intercept = false
+        } else {
+          intercept = onInterceptTouchEvent(event)
+        }
         var alreadyDispatchedToNewTouchTarget = false
         var nowTouchTarget: TouchTarget? = null
         if (!intercept) {
@@ -52,4 +59,76 @@ class ViewGroup(context: Context?) : View(context) {
     }
 
 }
+
+
+/**
+** View.dispatchTouchEvent
+**/
+class View {
+  
+    /**
+     * Pass the touch screen motion event down to the target view, or this
+     * view if it is the target.
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     */
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // If the event should be handled by accessibility focus first.
+        if (event.isTargetAccessibilityFocus()) {
+            // We don't have focus or no virtual descendant has it, do not handle the event.
+            if (!isAccessibilityFocusedViewOrHost()) {
+                return false;
+            }
+            // We have focus and got the event, then use normal event dispatch.
+            event.setTargetAccessibilityFocus(false);
+        }
+
+        boolean result = false;
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+        }
+
+        final int actionMasked = event.getActionMasked();
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
+            // Defensive cleanup for new gesture
+            stopNestedScroll();
+        }
+
+        if (onFilterTouchEventForSecurity(event)) {
+            if ((mViewFlags & ENABLED_MASK) == ENABLED && handleScrollBarDragging(event)) {
+                result = true;
+            }
+            //noinspection SimplifiableIfStatement
+           // 先走OnTouchListener
+            ListenerInfo li = mListenerInfo;
+            if (li != null && li.mOnTouchListener != null
+                    && (mViewFlags & ENABLED_MASK) == ENABLED
+                    && li.mOnTouchListener.onTouch(this, event)) {
+                result = true;
+            }
+            // 没有再走onTouchEvent(onClickListener在onTouchEvent中调用)
+            if (!result && onTouchEvent(event)) {
+                result = true;
+            }
+        }
+
+        if (!result && mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
+        }
+
+        // Clean up after nested scrolls if this is the end of a gesture;
+        // also cancel it if we tried an ACTION_DOWN but we didn't want the rest
+        // of the gesture.
+        if (actionMasked == MotionEvent.ACTION_UP ||
+                actionMasked == MotionEvent.ACTION_CANCEL ||
+                (actionMasked == MotionEvent.ACTION_DOWN && !result)) {
+            stopNestedScroll();
+        }
+
+        return result;
+    }
+}
+
 ```
