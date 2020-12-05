@@ -149,3 +149,150 @@
     ```
 
     
+
+   13. ```java
+       
+            public static void main(String[] args) throws IOException {
+              System.out.println(tableSizeFor(10));
+           }
+       
+           static final int MAXIMUM_CAPACITY = 1 << 30;
+       
+       /**
+            * Returns a power of two size for the given target capacity.
+            返回大于cap值最近的2的整数次幂的数， 比如10，则返回16
+            */
+           static final int tableSizeFor(int cap) {
+               int n = cap - 1;
+               System.out.println("=================start============");
+               System.out.println(Integer.toBinaryString(n));
+               System.out.println("n>>>1 = " + Integer.toBinaryString(n>>>1));
+               n |= n >>> 1;
+               System.out.println("n |= n >>> 1 = " + Integer.toBinaryString(n));
+               System.out.println("n>>>2 = " + Integer.toBinaryString(n>>>2));
+               n |= n >>> 2;
+               System.out.println("n |= n >>> 2 = " + Integer.toBinaryString(n));
+               System.out.println("n>>>4 = " + Integer.toBinaryString(n>>>4));
+               n |= n >>> 4;
+               System.out.println("n |= n >>> 4 = " + Integer.toBinaryString(n));
+               System.out.println("n>>>8 = " + Integer.toBinaryString(n>>>8));
+               n |= n >>> 8;
+               System.out.println("n |= n >>> 8 = " + Integer.toBinaryString(n));
+               System.out.println("n>>>16 = " + Integer.toBinaryString(n>>>16));
+               n |= n >>> 16;
+               System.out.println("n |= n >>> 16 = " + Integer.toBinaryString(n));
+               return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+           }
+       ```
+
+        输出：=================start============
+1001
+n>>>1 = 100
+n |= n >>> 1 = 1101
+n>>>2 = 11
+n |= n >>> 2 = 1111
+n>>>4 = 0
+n |= n >>> 4 = 1111
+n>>>8 = 0
+n |= n >>> 8 = 1111
+n>>>16 = 0
+n |= n >>> 16 = 1111
+16
+
+
+
+
+
+14. ```java
+    /**
+    扩容：
+    **/
+    final Node<K,V>[] resize() {
+     2     Node<K,V>[] oldTab = table;
+     3     int oldCap = (oldTab == null) ? 0 : oldTab.length;
+     4     int oldThr = threshold;
+     5     int newCap, newThr = 0;
+     6     if (oldCap > 0) {
+     7         // 超过最大值就不再扩充了，就只好随你碰撞去吧
+     8         if (oldCap >= MAXIMUM_CAPACITY) {
+     9             threshold = Integer.MAX_VALUE;
+    10             return oldTab;
+    11         }
+    12         // 没超过最大值，就扩充为原来的2倍
+    13         else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+    14                  oldCap >= DEFAULT_INITIAL_CAPACITY)
+    15             newThr = oldThr << 1; // double threshold
+    16     }
+    17     else if (oldThr > 0) // initial capacity was placed in threshold
+    18         newCap = oldThr;
+    19     else {               // zero initial threshold signifies using defaults
+    20         newCap = DEFAULT_INITIAL_CAPACITY;
+    21         newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+    22     }
+    23     // 计算新的resize上限
+    24     if (newThr == 0) {
+    25 
+    26         float ft = (float)newCap * loadFactor;
+    27         newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+    28                   (int)ft : Integer.MAX_VALUE);
+    29     }
+    30     threshold = newThr;
+    31     @SuppressWarnings({"rawtypes"，"unchecked"})
+    32         Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
+    33     table = newTab;
+    34     if (oldTab != null) {
+    35         // 把每个bucket都移动到新的buckets中
+    36         for (int j = 0; j < oldCap; ++j) {
+    37             Node<K,V> e;
+    38             if ((e = oldTab[j]) != null) {
+    39                 oldTab[j] = null;
+    40                 if (e.next == null)
+    41                     newTab[e.hash & (newCap - 1)] = e;
+    42                 else if (e instanceof TreeNode)
+    43                     ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+    44                 else { // 链表优化重hash的代码块
+    45                     Node<K,V> loHead = null, loTail = null;
+    46                     Node<K,V> hiHead = null, hiTail = null;
+    47                     Node<K,V> next;
+    48                     do {
+    49                         next = e.next;
+    50                         // 原索引
+    51                         if ((e.hash & oldCap) == 0) {
+    52                             if (loTail == null)
+    53                                 loHead = e;
+    54                             else
+    55                                 loTail.next = e;
+    56                             loTail = e;
+    57                         }
+    58                         // 原索引+oldCap
+    59                         else {
+    60                             if (hiTail == null)
+    61                                 hiHead = e;
+    62                             else
+    63                                 hiTail.next = e;
+    64                             hiTail = e;
+    65                         }
+    66                     } while ((e = next) != null);
+    67                     // 原索引放到bucket里
+    68                     if (loTail != null) {
+    69                         loTail.next = null;
+    70                         newTab[j] = loHead;
+    71                     }
+    72                     // 原索引+oldCap放到bucket里
+    73                     if (hiTail != null) {
+    74                         hiTail.next = null;
+    75                         newTab[j + oldCap] = hiHead;
+    76                     }
+    77                 }
+    78             }
+    79         }
+    80     }
+    81     return newTab;
+    82 }
+    ```
+
+
+
+
+
+reference： https://tech.meituan.com/2016/06/24/java-hashmap.html
