@@ -124,3 +124,119 @@ public class ABA {
 
 AtomicInteger原子操作：true, 11 （更新成功了，但是实际上这个时候的10已经不是原来的10）
 AtomicStampedReference原子操作:false, 10（更新失败，版本号不一样了，认为现在的10是被修改过了）
+
+
+
+ABA的危害：
+
+Top -> 1 -> 2 -> 3
+
+Thread1: pop动作， 在执行compareAndSet前sleep，模拟线程切换, 此时top=1, next=2
+
+Thread2: pop 1, 2 在 push1， 此时 Top -> 1 -> 3, 执行完后切到Thread1继续top.compareAndSet(t, next), 此时top=1=t, 认为没有被修改过，可以执行替换，top->next=2与预期的 top->3不符合。这个就是所谓ABA问题
+
+```java
+import java.util.concurrent.atomic.AtomicReference;
+
+public class ABATest {
+
+    static class Stack {
+        // 将top放在原子类中
+        private AtomicReference<Node> top = new AtomicReference<>();
+        // 栈中节点信息
+        static class Node {
+            int value;
+            Node next;
+
+            public Node(int value) {
+                this.value = value;
+            }
+        }
+        // 出栈操作
+        public Node pop() {
+            for (;;) {
+                // 获取栈顶节点
+                Node t = top.get();
+                if (t == null) {
+                    return null;
+                }
+                // 栈顶下一个节点
+                Node next = t.next;
+                // CAS更新top指向其next节点
+                String thread = Thread.currentThread().getName();
+                if ("thread1".equals(thread)) {
+                    try {
+                        System.out.println("thread1 popping: before sleep : top " + t + " t.next " + (t.next == null) + " t.value " + t.value);
+                        if (next != null) {
+                            System.out.println("thread1 popping: before sleep : next " + next + " next.value " + next.value);
+                        }
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (top.compareAndSet(t, next)) {
+                    // 把栈顶元素弹出，应该把next清空防止外面直接操作栈
+                    t.next = null;
+                    return t;
+                }
+            }
+        }
+        // 入栈操作
+        public void push(Node node) {
+            for (;;) {
+                // 获取栈顶节点
+                Node next = top.get();
+                // 设置栈顶节点为新节点的next节点
+                node.next = next;
+                // CAS更新top指向新节点
+                if (top.compareAndSet(next, node)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private static void testStack() {
+        // 初始化栈为 top->1->2->3
+        Stack stack = new Stack();
+        stack.push(new Stack.Node(3));
+        stack.push(new Stack.Node(2));
+        stack.push(new Stack.Node(1));
+
+        // 线程1出栈一个元素
+        Thread thread1 = new Thread(() -> {
+            stack.pop();
+        });
+        thread1.setName("thread1");
+        thread1.start();
+        Thread thread2 = new Thread(()->{
+            // 线程2出栈两个元素
+            Stack.Node A = stack.pop();
+            Stack.Node B = stack.pop();
+            System.out.println("push A " + A);
+            // 线程2又把A入栈了
+            stack.push(A);
+        });
+        thread2.setName("thread2");
+        thread2.start();
+
+
+        try {
+            Thread.sleep(5000);
+            Stack.Node node;
+            while ((node =stack.pop()) != null) {
+                System.out.println("value " + node.value);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        testStack();
+    }
+}
+
+```
+
