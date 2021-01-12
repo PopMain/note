@@ -1,0 +1,27 @@
+```java
+public class ThreadTest extends Thread{
+
+    volatile boolean isRunning  = true;
+
+
+    @Override
+    public void run() {
+        super.run();
+        System.out.println("进入了run.......");
+        // 这里触发了指令重排，会导致一直读到缓存内（非主内存里的isRunning值），如果不用volatile，会导致一直循环
+        while (isRunning) {
+
+        }
+        System.out.println("run end");
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        ThreadTest threadTest = new ThreadTest();
+        threadTest.start();
+        Thread.sleep(1000);
+        threadTest.isRunning = false;
+    }
+    
+}
+```
+
