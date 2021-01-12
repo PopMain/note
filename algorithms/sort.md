@@ -6,12 +6,8 @@
 
 ```java
  public static void shellSort(int[] input) {
-<<<<<<< Updated upstream
-     int gap = input.length / 2;
-=======
         // 步长
         int gap = input.length / 2;
->>>>>>> Stashed changes
         while (gap > 0) {
             System.out.println("gap="+gap);
             for (int i = 0; i < gap; i ++) {
