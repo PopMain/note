@@ -11,4 +11,4 @@ android/Choregrapher
 
 android/ViewRootImpl
 
-android/Binder
+android/Binder、ApplicationThread
