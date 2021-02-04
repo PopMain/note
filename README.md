@@ -12,3 +12,5 @@ android/Choregrapher
 android/ViewRootImpl
 
 android/Binder、ApplicationThread
+
+Android/WindowManager、ActivityManagerService、PackageManagerService
