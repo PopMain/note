@@ -5,12 +5,14 @@
 
 ### todo-list:
 
-android/关于Handler.postDelay
+android/关于Handler.postDelay  ok
 
 android/Choregrapher
 
 android/ViewRootImpl
 
-android/Binder、ApplicationThread
+android/Binder
+
+android/ApplicaitonThread、 ActivityThread
 
 Android/WindowManager、ActivityManagerService、PackageManagerService
