@@ -1,0 +1,2 @@
+### ActivityManagerService、ActivityThread与ApplicationThread
+

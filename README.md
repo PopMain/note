@@ -14,5 +14,5 @@ android/ViewRootImpl
 android/Binder
 
 android/ApplicaitonThread、 ActivityThread
-
-Android/WindowManager、ActivityManagerService、PackageManagerService
+Android/WindowManager、ActivityManagerService、PackageManagerServiceAndroid/WindowManager、ActivityManagerService、PackageManagerServiceAndroid/WindowManager、ActivityManagerService、PackageManagerServiceAndroid/WindowManager、ActivityManagerService、PackageManagerService
+Android/ActivityThread、ApplicaitonThread
