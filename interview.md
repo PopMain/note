@@ -127,7 +127,7 @@
 2. 直播拉流
 3. 直播拉推流里做了什么工作
 4. 详情页内存优化
-5. Bitmap复用的坑
+5. Bitmap复用的坑， Bitmap复用的条件
 6. Glide缓存设计，ActvityResource
 7. 模块化怎么实现每个模块打出一个apk
 8. 服务发现和ARouter各自有什么优势
