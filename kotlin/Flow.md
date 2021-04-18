@@ -1,3 +1,5 @@
+流： 返回多个值。
+
 ```kotlin
  fun flowTest() = launch {
         simple().forEach { value ->
